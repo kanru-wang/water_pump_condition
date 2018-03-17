@@ -105,3 +105,19 @@ def clean_strings(s):
         .replace('&', 'and')\
         .replace('-', '_')
     return s_clean
+
+
+def measure_length(x):
+    try:
+        length = len(x)
+    except TypeError:
+        length = np.nan
+    return length
+
+
+def group_small_levels(df, target_col_name, freq_col_name, threshold):
+    return(df.apply(lambda x: x[target_col_name] 
+                    if x[freq_col_name] >= threshold 
+                    else 'small_levels', 
+                    axis=1))
+    

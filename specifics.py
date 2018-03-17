@@ -46,6 +46,30 @@ def clean_feature_df(df_raw):
             #                                        'XPLANOccupationIdTrimmed']
             #)
             #.pipe(data.boolean_to_numeric, col = 'smoker')
+            .assign(
+                funder_length = lambda x: x['funder'].apply(lambda x: data.measure_length(x)),
+                installer_length = lambda x: x['installer'].apply(lambda x: data.measure_length(x)),
+                wpt_name_length = lambda x: x['wpt_name'].apply(lambda x: data.measure_length(x)),
+                scheme_name_length = lambda x: x['scheme_name'].apply(lambda x: data.measure_length(x)),
+                subvillage_name_length = lambda x: x['subvillage'].apply(lambda x: data.measure_length(x)),
+                ward_length = lambda x: x['ward'].apply(lambda x: data.measure_length(x))
+            )
+            .assign(
+                funder_freq = lambda x: x.groupby('funder')['funder'].transform('count'),
+                installer_freq = lambda x: x.groupby('installer')['installer'].transform('count'),
+                wpt_name_freq = lambda x: x.groupby('wpt_name')['wpt_name'].transform('count'),
+                scheme_name_freq = lambda x: x.groupby('scheme_name')['scheme_name'].transform('count'),
+                subvillage_freq = lambda x: x.groupby('subvillage')['subvillage'].transform('count'),
+                ward_freq = lambda x: x.groupby('ward')['ward'].transform('count')                
+            )
+            .assign(
+                funder_small_levels_grouped = lambda x: data.group_small_levels(x, 'funder', 'funder_freq', 80),
+                installer_small_levels_grouped = lambda x: data.group_small_levels(x, 'installer', 'installer_freq', 80),
+                wpt_name_small_levels_grouped = lambda x: data.group_small_levels(x, 'wpt_name', 'wpt_name_freq', 80),
+                scheme_name_small_levels_grouped = lambda x: data.group_small_levels(x, 'scheme_name', 'scheme_name_freq', 80),
+                subvillage_small_levels_grouped = lambda x: data.group_small_levels(x, 'subvillage', 'subvillage_freq', 80),
+                ward_small_levels_grouped = lambda x: data.group_small_levels(x, 'ward', 'ward_freq', 80)
+            )
             # drop all unused columns and dependent variables
             .drop(['date_recorded', 'funder', 'installer', 'wpt_name',    
                    'scheme_name', 'subvillage', 'ward'], axis=1)
