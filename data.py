@@ -10,15 +10,15 @@ import copy
 
 
 class ClassificationData:
-    data_attr = ('raw_feature_df', 'feature_df', 'outcome_df')
+    data_attr = ('train_feature_df', 'train_outcome_df', 'test_feature_df')
 
     def __len__(self):
         return len(self.outcome_df)
 
-    def __init__(self, raw_feature_df, feature_df, outcome_df):
-        self.raw_feature_df = raw_feature_df
-        self.feature_df = feature_df
-        self.outcome_df = outcome_df
+    def __init__(self, train_feature_df, train_outcome_df, test_feature_df):
+        self.train_feature_df = train_feature_df
+        self.train_outcome_df = train_outcome_df
+        self.test_feature_df = test_feature_df
 
     def __getitem__(self, postition):
         return ClassificationData(
@@ -49,12 +49,16 @@ def cleaner(df):
          df_string_cleaner(df[col_str])],
         axis=1)
 
-
+# Need to transpose, get rid of the duplicated columns, and transpose again.
+# Two ways to dedup: the current way (see below) or df_dummified_transposed.drop_duplicates().T
+# https://stackoverflow.com/questions/13035764/remove-rows-with-duplicate-indices-pandas-dataframe-and-timeseries
 def df_string_cleaner(df):
     df_clean = (df.fillna('undefined').applymap(clean_strings)
                 .applymap(lambda x: x.lower()))
     #return pd.get_dummies(df_clean, drop_first = True)
-    return pd.get_dummies(df_clean)
+    #return pd.get_dummies(df_clean)
+    df_dummified_transposed  = pd.get_dummies(df_clean).T
+    return df_dummified_transposed[~df_dummified_transposed.duplicated()].T
 
 
 def df_other_cleaner(df):
