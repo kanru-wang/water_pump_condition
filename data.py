@@ -120,4 +120,12 @@ def group_small_levels(df, target_col_name, freq_col_name, threshold):
                     if x[freq_col_name] >= threshold 
                     else 'small_levels', 
                     axis=1))
+
+
+def turn_string(number):
+    try:
+        string = 'str' + str(number)
+    except TypeError:
+        string = np.nan
+    return string
     
