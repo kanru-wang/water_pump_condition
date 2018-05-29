@@ -35,7 +35,8 @@ def clean_feature_df(df_raw):
                 created_year=lambda x: pd.to_datetime(x['date_recorded']).dt.year,
                 created_month=lambda x: pd.to_datetime(x['date_recorded']).dt.month,
                 created_day=lambda x: pd.to_datetime(x['date_recorded']).dt.day,
-                created_dow=lambda x: pd.to_datetime(x['date_recorded']).dt.weekday # Monday is 0, Sunday is 6. 
+                created_dow=lambda x: pd.to_datetime(x['date_recorded']).dt.weekday, # Monday is 0, Sunday is 6.
+                days_from_2000=lambda x: (pd.to_datetime(x['date_recorded']) - pd.to_datetime('01/01/2000')).dt.days
             )
             .assign(age = lambda x: x['created_year'] - x['construction_year'])
             #.pipe(data.cols_to_numeric, cols= ['postCode', 
@@ -48,7 +49,7 @@ def clean_feature_df(df_raw):
             #.pipe(data.boolean_to_numeric, col = 'smoker')
             .assign(
                 categorical_district_code = lambda x: x['district_code'].apply(lambda x: data.turn_string(x)),
-                #categorical_construction_year = lambda x: x['construction_year'].apply(lambda x: data.turn_string(x)),
+                categorical_construction_year = lambda x: x['construction_year'].apply(lambda x: data.turn_string(x)),
                 categorical_created_year = lambda x: x['created_year'].apply(lambda x: data.turn_string(x)),
                 categorical_created_month = lambda x: x['created_month'].apply(lambda x: data.turn_string(x)),
                 #categorical_created_day = lambda x: x['created_day'].apply(lambda x: data.turn_string(x)),
@@ -71,12 +72,12 @@ def clean_feature_df(df_raw):
                 ward_freq = lambda x: x.groupby('ward')['ward'].transform('count')                
             )
             .assign(
-                funder_small_levels_grouped = lambda x: data.group_small_levels(x, 'funder', 'funder_freq', 80),
-                installer_small_levels_grouped = lambda x: data.group_small_levels(x, 'installer', 'installer_freq', 80),
-                wpt_name_small_levels_grouped = lambda x: data.group_small_levels(x, 'wpt_name', 'wpt_name_freq', 80),
-                scheme_name_small_levels_grouped = lambda x: data.group_small_levels(x, 'scheme_name', 'scheme_name_freq', 80),
-                subvillage_small_levels_grouped = lambda x: data.group_small_levels(x, 'subvillage', 'subvillage_freq', 80),
-                ward_small_levels_grouped = lambda x: data.group_small_levels(x, 'ward', 'ward_freq', 80)
+                funder_small_levels_grouped = lambda x: data.group_small_levels(x, 'funder', 'funder_freq', 60),
+                installer_small_levels_grouped = lambda x: data.group_small_levels(x, 'installer', 'installer_freq', 60),
+                wpt_name_small_levels_grouped = lambda x: data.group_small_levels(x, 'wpt_name', 'wpt_name_freq', 60),
+                scheme_name_small_levels_grouped = lambda x: data.group_small_levels(x, 'scheme_name', 'scheme_name_freq', 60),
+                subvillage_small_levels_grouped = lambda x: data.group_small_levels(x, 'subvillage', 'subvillage_freq', 60),
+                ward_small_levels_grouped = lambda x: data.group_small_levels(x, 'ward', 'ward_freq', 60)
             )
             # drop all unused columns and dependent variables
             .drop(['date_recorded', 'funder', 'installer', 'wpt_name', 'district_code',   
@@ -85,7 +86,7 @@ def clean_feature_df(df_raw):
             # Remove all columns which are constant - removed for testing
             .pipe(lambda x: x.loc[:, x.apply(pd.Series.nunique) != 1])
             # Each column need to in this case have at least xx cases
-            .pipe(lambda x: x.loc[:, x.apply(pd.Series.sum) >= 80])
+            .pipe(lambda x: x.loc[:, x.apply(pd.Series.sum) >= 60])
             )
 
 
